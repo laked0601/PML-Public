@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Modify - {{ security.ticker }}</title>
+    <style title="button-style" type="text/css">
+        .header {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        * {
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            margin-bottom: 400px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #modify-form{
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        #modify-form td {
+            width: 0px;
+        }
+        #modify-form input, select {
+            width: 100px;
+        }
+        .button-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .button-container button {
+            margin: 0 10px;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .button-container button:hover {
+            background-color: #45a049;
+        }
+        #trades {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        #trades th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        #trades tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        #modify-form input, #modify-form select, #modify-form label, .header p {
+            font-size: 18px;
+        }
+        #modify-form input, #modify-form select, #modify-form label {
+            width: 100%;
+        }
+        @media (max-width: 600px){
+            #modify-form {
+                padding: 2px;
+            }
+            #trades th, td {
+                padding: 2px;
+            }
+        }
+        @media (max-width: 400px){
+            #trades th, td {
+                padding: 0px;
+                font-size: 12px;
+            }
+            .container{
+                padding: 2px;
+            }
+            .button-container button{
+                margin: 0px;
+            }
+            #modify-form input, #modify-form select, #modify-form label {
+                width: 90%;
+            }
+            .header{
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+        }
+    </style>
+    <script>
+        var HOLDING_PRICE = {{ security.last_price }};
+        const SECURITY_PK = {{ security.security_pk }};
+    </script>
+</head>
+<body>
+<div class="container">
+    <button onclick="window.location.href = '{{ BASE_ENDPOINT }}/holdings.html?number={{ form.portfolio.data }}'"  style="margin: 0 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px; transition: background-color 0.3s ease;">Return</button>
+    <div class="header">
+        
+        <h1>{{ security.ticker }}</h1>
+        <h4>{{ security.name }}</h4>
+
+        <p><strong>Description:</strong> {{ security.description }}</p>
+        <p><strong>Market Cap:</strong> {{ security.market_cap | format_large_number }}</p>
+        <p><strong>Share Class Shares Outstanding:</strong> {{ security.share_class_shares_outstanding | format_large_number  }}</p>
+        <p><strong>Weighted Shares Outstanding:</strong> {{ security.weighted_shares_outstanding | format_large_number }}</p>
+        <p><strong>Round Lot:</strong> {{ security.round_lot }}</p>
+        <p><strong>Active:</strong> {{ security.active }}</p>
+        <p><strong>Primary Exchange:</strong> {{ security.primary_exchange }}</p>
+        <p><strong>Type:</strong> {{ security.type }}</p>
+        <p><strong>SIC Code:</strong> {{ security.sic_code }}</p>
+        <p><strong>Market:</strong> {{ security.market }}</p>
+        <p><strong>Last Price Date:</strong> {{ security.last_price_date }}</p>
+        <p><strong>Last Close Price:</strong> {{ security.last_price }}</p>
+    </div>
+    <form id="modify-form" method="POST">
+        <table>
+            <tr>
+                <td><label for="action">Action:</label></td>
+                <td>{{ form.action(class="form-control") }}</td>
+            </tr>
+            <tr>
+                <td><label for="trade_date">Trade Date:</label></td>
+                <td>{{ form.trade_date(class="form-control") }}</td>
+            </tr>
+            <tr>
+                <td><label for="trade_price">Trade Price:</label></td>
+                <td><div id="trade_price"></div></td>
+            </tr>
+            <tr>
+                <td><label for="units">Units:</label></td>
+                <td>{{ form.units(class="form-control") }}</td>
+            </tr>
+            <tr>
+                <td><label for="amount">Amount:</label></td>
+                <td>{{ form.amount(class="form-control", readonly=true) }}</td>
+            </tr>
+        </table>
+        <div hidden>
+            {{ form.hidden_tag() }}
+            {{ form.portfolio(class="form-control") }}
+            {{ form.holding(class="form-control") }}
+        </div>
+        <div class="button-container">
+            <button type="submit">Submit</button>
+        </div>
+        <div>{{ message }}</div>
+    </form>
+    <table id="trades">
+        <thead>
+            <tr>
+                <th>Trade Date</th>
+                <th>Type</th>
+                <th>Ticker</th>
+                <th>Units</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in trades %}
+            <tr>
+                <td>{{ row.0 }}</td>
+                <td>{{ row.1 }}</td>
+                <td>{{ row.2 }}</td>
+                <td>{{ row.3 }}</td>
+                <td>{{ row.4 | accounting_format }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+
+<script>
+    
+var unitsInput = document.getElementById('units');
+var amountInput = document.getElementById('amount');
+var dateInput = document.getElementById('trade_date');
+document.addEventListener('DOMContentLoaded', function() {
+    dateInput.addEventListener('input', function() {
+        get_price();
+        update_amount();
+    });
+
+    unitsInput.addEventListener('input', function() {
+        update_amount();
+    });
+});
+function get_price(){
+    fetch('{{ BASE_ENDPOINT }}/get-price?PK=' + SECURITY_PK + '&date=' + dateInput.value).then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    }).then(data => {
+        HOLDING_PRICE = data["price"]
+    }).catch(error => {
+        console.error('Error:', error);
+    });
+}
+function update_amount(){
+    document.getElementById('trade_price').innerHTML = HOLDING_PRICE.toFixed(2);
+    amountInput.value = (parseFloat(unitsInput.value) * HOLDING_PRICE).toFixed(2);
+}
+document.getElementById('modify-form').onkeydown = function (event) {
+    return event.key !== 'Enter';
+};
+</script>
+</html>

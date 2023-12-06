@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Portfolios</title>
+    <style>
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        * {
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            margin-bottom: 400px;
+        }
+        .container {
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #DDD;
+            max-height: 30px;
+        }
+
+        tr:hover {
+            background-color: #D6EEEE;
+        }
+
+        .btn-primary {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #45a049;
+        }
+        button {
+            margin: 0 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        #input-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .centered-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        @media (max-width: 800px){
+            .table-container {
+                overflow-x: auto;
+            }
+            th, td{
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <form method="post">
+        <h2>New Portfolio</h2>
+        {% if DEMO %}
+        <h4 style="color: red; font-weight: bold">This is a demo version of the application and inputs have been disabled. Please install the app and disable demo in globals.py to work with live data.</h4>
+        {% endif %}
+        <div id="input-container">
+            <input type="hidden" name="csrf_token" value = "{{ csrf_token() }}"/>
+            <div class="centered-box">
+                {{ form.name.label }}
+                {{ form.name }}
+            </div>
+            <div class="centered-box">
+                {{ form.description.label }}
+                {{ form.description }}
+            </div>
+            <div class="centered-box">
+                <button>Submit</button>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="table-container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Name</th>
+                <th>Holdings Count</th>
+                <th>Creation Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pf in portfolios %}
+            <tr>
+                <td>{{ pf.PK }}</td>
+                <td><a href="{{ BASE_ENDPOINT }}/holdings.html?number={{ pf.PK }}">{{ pf.name }}</a></td>
+                <td>{{ pf.holdings_count }}</td>
+                <td>{{ pf.create_date }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+        </tfoot>
+    </table>
+</div>
+</body>
+</html>
